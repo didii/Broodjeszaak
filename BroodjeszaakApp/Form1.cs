@@ -1,29 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using BroodjeszaakLib;
 
 namespace BroodjeszaakApp {
+    /// <summary>
+    ///     Holds the logic of the main form
+    /// </summary>
     public partial class Form1 : Form {
-        #region Fields
-        private PriceList _priceList;
-        private Order _order;
-        private static int _orderNumber = 0;
-        #endregion
-
         #region Constructor
+        /// <summary>
+        ///     Only constructor available: it needs a pricelist
+        /// </summary>
+        /// <param name="pricelist"></param>
         public Form1(PriceList pricelist) {
+            // Setup some variables
             _priceList = pricelist;
             _order = new Order(pricelist);
             _order.PriceChanged += SetPrice;
+
+            // Create the form
             InitializeComponent();
 
+            // Add bread radio buttons
             foreach (var bread in pricelist.ListOfBread) {
                 var radio = new RadioButton {Text = bread.Name.ToTitleCase()};
                 radio.Padding = new Padding(0);
@@ -31,18 +30,42 @@ namespace BroodjeszaakApp {
                 radio.CheckedChanged += BreadSelectors_CheckedChanged;
                 flowLayoutPanelKeuzeBrood.Controls.Add(radio);
             }
+            // Fill up spread
             listBoxBeleg.Items.AddRange(pricelist.ListOfSpreads.ToArray());
+            // Fill up sauces
             comboBoxSaus.Items.AddRange(pricelist.ListOfSauces.ToArray());
         }
         #endregion
 
-        #region Methods
-        public void SetRadioButtons(List<string> names) { }
+        #region Fields
+        /// <summary>
+        ///     The list of all the prices, not used anymore
+        /// </summary>
+        private PriceList _priceList;
 
+        /// <summary>
+        ///     A single order (the current one)
+        /// </summary>
+        private readonly Order _order;
+
+        /// <summary>
+        ///     The order number (should be moved into <see cref="Order"/>
+        /// </summary>
+        private static int _orderNumber;
+        #endregion
+
+        #region Methods
+        /// <summary>
+        ///     Sets the price to the given value
+        /// </summary>
+        /// <param name="price"></param>
         private void SetPrice(float price) {
             textBoxPrice.Text = price.ToString("C");
         }
 
+        /// <summary>
+        ///     Reset all fields back to the default values (=nothing selected)
+        /// </summary>
         private void ClearChoices() {
             //Clear bread choice
             foreach (var control in flowLayoutPanelKeuzeBrood.Controls) {
@@ -59,15 +82,24 @@ namespace BroodjeszaakApp {
             checkBoxSmos.Checked = false;
         }
 
+        /// <summary>
+        ///     Moves an item from <see cref="listViewPendingOrders"/> to <see cref="listViewOrdersDone"/> with the given status.
+        /// </summary>
+        /// <param name="item">The item to move</param>
+        /// <param name="status">The updated status value</param>
         private void MoveItemAs(ListViewItem item, string status) {
             listViewPendingOrders.Items.Remove(item);
             item.SubItems[columnHeaderPendingStatus.Index].Text = status;
             listViewOrdersDone.Items.Add(item);
         }
-
         #endregion
 
         #region Event handlers
+        /// <summary>
+        ///     Called whenever a radio button changed value
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BreadSelectors_CheckedChanged(object sender, EventArgs e) {
             var radio = (RadioButton)sender;
             if (!radio.Checked) //ignore if unchecked
@@ -83,11 +115,21 @@ namespace BroodjeszaakApp {
             _order.SetBread(radio.Text.ToLower());
         }
 
+        /// <summary>
+        ///     Called when the selected spread changes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SpreadSelector_SelectedIndexChanged(object sender, EventArgs e) {
             var box = (ListBox)sender;
             _order.SetSpread(box.SelectedItems.Cast<PriceList.PricedItem>());
         }
 
+        /// <summary>
+        ///     Called when a different sauce is selected
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SauceSelector_SelectedIndexChanged(object sender, EventArgs e) {
             var box = (ComboBox)sender;
             if (box.SelectedItem is string)
@@ -96,18 +138,28 @@ namespace BroodjeszaakApp {
                 _order.SetSauce((PriceList.PricedItem)box.SelectedItem);
         }
 
+        /// <summary>
+        ///     Called when the value of the vegetables checkbox changed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void VegetablesSelector_CheckedChanged(object sender, EventArgs e) {
             var box = (CheckBox)sender;
             _order.SetVegetables(box.Checked);
         }
 
+        /// <summary>
+        ///     Called when the button 'Plaats bestelling' was pressed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonPlaceOrder_Click(object sender, EventArgs e) {
             if (!_order.IsValid()) {
                 textBoxOrder.Text = "ERROR: Er werd geen broodje geselecteerd";
                 return;
             }
             textBoxOrder.Text = _order.ToString();
-            var row = new string[] {
+            var row = new[] {
                 _orderNumber++.ToString(),
                 "ToDo",
                 _order.Bread.Name.ToTitleCase(),
@@ -123,6 +175,11 @@ namespace BroodjeszaakApp {
             ClearChoices();
         }
 
+        /// <summary>
+        ///     Called when the button 'Bestelling uitgevoerd' is pressed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonOrderDone_Click(object sender, EventArgs e) {
             if (listViewPendingOrders.SelectedItems.Count == 0)
                 return;
@@ -132,16 +189,17 @@ namespace BroodjeszaakApp {
             }
         }
 
+        /// <summary>
+        ///     Called when the button 'Cancel bestelling' is pressed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonCancelOrder_Click(object sender, EventArgs e) {
             if (listViewPendingOrders.SelectedItems.Count == 0)
                 return;
             foreach (ListViewItem sel in listViewPendingOrders.SelectedItems)
                 MoveItemAs(sel, "Cancelled");
         }
-
-
         #endregion
-
-
     }
 }

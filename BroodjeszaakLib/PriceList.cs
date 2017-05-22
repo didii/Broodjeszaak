@@ -2,15 +2,24 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BroodjeszaakLib {
+    /// <summary>
+    ///     Holds all items, their category and prices
+    /// </summary>
     public class PriceList {
+        #region Constructor
+        /// <summary>
+        ///     Default constructor
+        /// </summary>
+        public PriceList() {
+            Items = new List<PricedItem>();
+        }
+        #endregion
+
         #region Types
         /// <summary>
-        /// An item that has a category, name and price
+        ///     An item that has a category, name and price
         /// </summary>
         public class PricedItem {
             public enum EType {
@@ -21,18 +30,24 @@ namespace BroodjeszaakLib {
             }
 
             /// <summary>
-            /// The type of the item
+            ///     The type of the item
             /// </summary>
             public EType Type { get; set; }
+
             /// <summary>
-            /// The name of the item
+            ///     The name of the item
             /// </summary>
             public string Name { get; set; }
+
             /// <summary>
-            /// The price of the item
+            ///     The price of the item
             /// </summary>
             public float Price { get; set; }
 
+            /// <summary>
+            ///     Handy string representation of an item, used in listviews etc.
+            /// </summary>
+            /// <returns></returns>
             public override string ToString() {
                 return Name.ToTitleCase();
             }
@@ -41,45 +56,51 @@ namespace BroodjeszaakLib {
 
         #region Fields
         /// <summary>
-        /// In what column the type is
+        ///     In what column the type is
         /// </summary>
         public static int TypeColumn = 0;
+
         /// <summary>
-        /// In what column the name is
+        ///     In what column the name is
         /// </summary>
         public static int NameColumn = 1;
+
         /// <summary>
-        /// In what columns the price is
+        ///     In what columns the price is
         /// </summary>
         public static int PriceColumn = 2;
+
         /// <summary>
-        /// The total amount of columns
+        ///     The total amount of columns
         /// </summary>
         public const int NumColumns = 3;
         #endregion
 
         #region Properties
         /// <summary>
-        /// All priced items
+        ///     All priced items
         /// </summary>
         public List<PricedItem> Items { get; private set; }
 
+        /// <summary>
+        ///     All bread types available
+        /// </summary>
         public List<PricedItem> ListOfBread {
             get { return Items.Where(i => i.Type == PricedItem.EType.Brood).ToList(); }
         }
 
+        /// <summary>
+        ///     All spreads available
+        /// </summary>
         public List<PricedItem> ListOfSpreads {
             get { return Items.Where(i => i.Type == PricedItem.EType.Beleg).ToList(); }
         }
 
+        /// <summary>
+        ///     All sauces available
+        /// </summary>
         public List<PricedItem> ListOfSauces {
             get { return Items.Where(i => i.Type == PricedItem.EType.Saus).ToList(); }
-        }
-        #endregion
-
-        #region Constructor
-        public PriceList() {
-            Items = new List<PricedItem>();
         }
         #endregion
 
@@ -97,13 +118,14 @@ namespace BroodjeszaakLib {
             var text = File.ReadAllLines(filePath);
             var startLine = hasHeaderRow ? 1 : 0;
             var fault = false;
-            for (int i = startLine; i < text.Length; i++) {
+            for (var i = startLine; i < text.Length; i++) {
                 var cols = text[i].Split(separator); //split
 
                 //Check number of columns
                 if (cols.Length != NumColumns) {
                     fault = true;
-                    Console.WriteLine($"[WARNING] This row does not contain exactly ${NumColumns} columns, skipping row: {text[i]}");
+                    Console
+                        .WriteLine($"[WARNING] This row does not contain exactly ${NumColumns} columns, skipping row: {text[i]}");
                     continue;
                 }
                 //Check type
@@ -131,20 +153,41 @@ namespace BroodjeszaakLib {
             return !fault;
         }
 
+        /// <summary>
+        ///     Adds a single item to the list
+        /// </summary>
+        /// <param name="item"></param>
+        /// <remarks>
+        ///     Does not check for duplicates. Any duplicate added cannot be retreived in any way except for clearing the list or
+        ///     clearing all duplicates.
+        /// </remarks>
         public void AddItem(PricedItem item) {
             Items.Add(item);
         }
 
+        /// <summary>
+        ///     Removes a single item from the list
+        /// </summary>
+        /// <param name="item"></param>
         public void RemoveItem(PricedItem item) {
             Items.Remove(item);
         }
 
+        /// <summary>
+        ///     Completely clears the list
+        /// </summary>
         public void Clear() {
             Items.Clear();
         }
         #endregion
 
         #region Operators
+        /// <summary>
+        ///     Gets the first item matching the type and name
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public PricedItem this[PricedItem.EType type, string name] {
             get { return Items.First(i => i.Type == type && i.Name == name); }
             set {
@@ -153,6 +196,11 @@ namespace BroodjeszaakLib {
             }
         }
 
+        /// <summary>
+        ///     Gets the first item matching the name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public PricedItem this[string name] {
             get { return Items.First(i => i.Name == name); }
             set {
@@ -161,6 +209,11 @@ namespace BroodjeszaakLib {
             }
         }
 
+        /// <summary>
+        ///     Gets the first item of this type (only used for Smos)
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public PricedItem this[PricedItem.EType type] {
             get { return Items.First(i => i.Type == type); }
         }

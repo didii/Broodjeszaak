@@ -12,8 +12,9 @@ namespace BroodjeszaakApp {
         /// </summary>
         [STAThread]
         static void Main(string[] args) {
+            //Check argument info
             var pricelist = new PriceList();
-            if (!pricelist.LoadFromFile(args[0])) {
+            if (args.Length < 1 || !pricelist.LoadFromFile(args[0])) {
                 var result = MessageBox.Show("Something went wrong while reading the file...\n\nContinue?",
                                              "Warning",
                                              MessageBoxButtons.YesNo,
@@ -22,6 +23,7 @@ namespace BroodjeszaakApp {
                     return;
             }
 
+            // Show form
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1(pricelist));
