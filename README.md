@@ -24,3 +24,4 @@ Bij zowel `Bestelling uitgevoerd` als `Cancel bestelling` kunnen er meerdere ord
 ## Werking App
 * De app werd gemaakt m.b.v. Windows Forms. Reden: het is een klein project, i.e. WPF is wat te uitgebreid om dit in te maken. Zelf heb ik ook meer ervaring in Windows Forms dan WPF momenteel, hoewel WPF veelbelovender is.
 * UI en logica zijn min of meer gescheiden. De data voor Order en de lijst van prijzen worden bijvoorbeeld bijgehouden in BroodjeszaakLib, maar de geplaatste orders worden helaas bijgehouden in de UI. Reden: tijdsgebrek. De klasse `Order` zou nog uitgebreid moeten worden om een veld `Status` en `ID` bij te houden en er zou een klasse of database achter moeten komen die een verzameling van orders bijhoudt. 
+* De velden bovenaan worden dynamisch gegenereerd. I.e. de type broodjes, beleg en saus komen allen vanuit de csv file. Indien er broodjes worden toegevoegd, zal wel de UI manueel herschaald moeten worden zodat ze er allemaal op passen.
